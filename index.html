@@ -3,91 +3,90 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>家族収支管理 v6.5.6</title>
+  <title>ダイエット管理アプリ v1.1.0</title>
   <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
     :root { --line-green: #06C755; --line-blue: #007bff; --bg-gray: #f0f2f5; }
     body { font-family: -apple-system, sans-serif; background: var(--bg-gray); margin: 0; padding: 10px; }
-    .container { background: white; border-radius: 16px; padding: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); max-width: 500px; margin: auto; }
-    
-    /* メニュータブ */
-    .tab-menu, .type-menu { display: flex; background: #eee; border-radius: 10px; padding: 4px; margin-bottom: 15px; }
-    .tab, .type-btn { flex: 1; padding: 10px; text-align: center; cursor: pointer; border-radius: 8px; color: #666; font-size: 14px; }
+    .container { background: white; border-radius: 16px; padding: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); max-width: 520px; margin: auto; }
+    .tab-menu { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; background: #eee; border-radius: 10px; padding: 4px; margin-bottom: 15px; gap: 4px; }
+    .tab { padding: 10px 6px; text-align: center; cursor: pointer; border-radius: 8px; color: #666; font-size: 13px; }
     .tab.active { background: white; font-weight: bold; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-    .type-btn.active.expense { background: white; color: #d9534f; font-weight: bold; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-    .type-btn.active.income { background: white; color: var(--line-blue); font-weight: bold; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-    
+    .type-menu { display: grid; grid-template-columns: 1fr 1fr 1fr; background: #eee; border-radius: 10px; padding: 4px; margin-bottom: 15px; gap: 4px; }
+    .type-btn { padding: 10px; text-align: center; cursor: pointer; border-radius: 8px; color: #666; font-size: 13px; }
+    .type-btn.active { background: white; color: #333; font-weight: bold; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
     .page { display: none; }
     .page.active { display: block; }
-
     label { display: block; margin: 10px 0 5px; font-size: 13px; color: #555; font-weight: bold; }
-    input, select { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 14px; margin-bottom: 8px; }
-    
-    /* 履歴フィルタ */
-    .filter-box { background: #f9f9f9; padding: 10px; border-radius: 10px; margin-bottom: 15px; border: 1px solid #eee; }
-    .filter-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-    .total-display { font-size: 18px; font-weight: bold; text-align: center; color: #333; margin: 10px 0; border-bottom: 2px solid var(--line-green); padding-bottom: 5px; }
-
-    /* 写真プレビュー */
-    .photo-buttons { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
+    input, select, button { width: 100%; box-sizing: border-box; }
+    input, select { padding: 10px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; margin-bottom: 8px; }
+    .btn-main { background: var(--line-green); color: white; border: none; padding: 14px; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; }
+    .btn-main:disabled { background: #ccc; }
     .btn-sub { background: #666; color: white; padding: 10px; border-radius: 8px; text-align: center; font-size: 12px; font-weight: bold; cursor: pointer; }
+    .photo-buttons { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
     .preview-container { display: flex; gap: 5px; margin-bottom: 10px; }
     .preview-wrapper { position: relative; width: 32%; }
     .preview-img { width: 100%; height: 80px; object-fit: cover; border-radius: 6px; border: 1px solid #ddd; }
-    .del-btn { position: absolute; top: -5px; right: -5px; background: red; color: white; border-radius: 50%; width: 20px; height: 20px; font-size: 12px; text-align: center; line-height: 20px; cursor: pointer; }
-
-    /* リスト項目 */
-    .list-item { border-bottom: 1px solid #f0f0f0; padding: 12px 0; display: flex; justify-content: space-between; align-items: center; }
-    .income-text { color: var(--line-blue); }
-    .expense-text { color: #d9534f; }
-    
-    /* 画像表示ボタン */
-    .image-link-btn {
-      background: #f0f0f0;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-      padding: 4px 8px;
-      font-size: 11px;
-      color: #333;
-      text-decoration: none;
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-      margin-left: 4px;
-      cursor: pointer;
-    }
-    .image-link-btn:active { background: #e0e0e0; }
-
-    /* 送信ボタン */
-    #submitBtn { background: var(--line-green); color: white; border: none; width: 100%; padding: 15px; border-radius: 8px; font-size: 18px; font-weight: bold; cursor: pointer; }
-    #submitBtn:disabled { background: #ccc; }
-    
-    /* グラフ */
+    .del-btn { position: absolute; top: -5px; right: -5px; background: red; color: white; border-radius: 50%; width: 20px; height: 20px; font-size: 12px; line-height: 20px; text-align: center; cursor: pointer; }
+    .filter-box { background: #f9f9f9; padding: 10px; border-radius: 10px; margin-bottom: 15px; border: 1px solid #eee; }
+    .filter-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .total-display { font-size: 15px; font-weight: bold; text-align: center; color: #333; margin: 10px 0; border-bottom: 2px solid var(--line-green); padding-bottom: 5px; }
+    .list-item { border-bottom: 1px solid #f0f0f0; padding: 12px 0; display: flex; justify-content: space-between; gap: 8px; }
+    .metric-text { color: var(--line-blue); font-weight: bold; font-size: 13px; }
+    .type-label { color: #d9534f; font-weight: bold; font-size: 12px; }
+    .image-link-btn { background: #f0f0f0; border: 1px solid #ccc; border-radius: 4px; padding: 4px 8px; font-size: 11px; cursor: pointer; }
     .chart-section { margin-top: 20px; text-align: center; }
     .chart-title { font-size: 14px; font-weight: bold; color: #666; margin-bottom: 10px; }
     .chart-container { position: relative; width: 100%; margin: auto; margin-bottom: 30px; }
     .doughnut-container { width: min(100%, 320px); margin-left: auto; margin-right: auto; }
+    .hidden { display: none; }
+    #aiResult, #calorieResult { background: #f9f9f9; border: 1px solid #eee; border-radius: 10px; padding: 12px; margin-top: 12px; white-space: pre-wrap; line-height: 1.5; font-size: 14px; min-height: 100px; }
+    .source-links { margin-top: 8px; font-size: 12px; }
   </style>
 </head>
 <body>
-
 <div class="container">
   <div class="tab-menu">
-    <div class="tab active" onclick="showPage('input')">入力</div>
+    <div class="tab active" onclick="showPage('input')">記録</div>
     <div class="tab" onclick="showPage('list')">履歴</div>
     <div class="tab" onclick="showPage('summary')">サマリー</div>
+    <div class="tab" onclick="showPage('advice')">AI助言</div>
   </div>
 
   <div id="pageInput" class="page active">
     <div class="type-menu">
-      <div id="typeExpense" class="type-btn active expense" onclick="setType('出金')">出金</div>
-      <div id="typeIncome" class="type-btn income" onclick="setType('入金')">入金</div>
+      <div id="typeMeal" class="type-btn active" onclick="setRecordType('食事')">食事</div>
+      <div id="typeWorkout" class="type-btn" onclick="setRecordType('運動')">運動</div>
+      <div id="typeHealth" class="type-btn" onclick="setRecordType('体調')">体調</div>
     </div>
-    <label>カテゴリ</label><select id="category"></select>
-    <label>金額</label><input type="number" id="amount" placeholder="金額" inputmode="numeric">
-    <label>内容 / 支払先</label><input type="text" id="shop" placeholder="例: 給与、スーパー">
+    <label>分類</label><select id="category"></select>
+    <label>メモ</label><input type="text" id="memo" placeholder="例: 鶏胸肉サラダ / ジムで筋トレ30分">
     <label>日付</label><input type="date" id="date">
+
+    <div id="mealFields">
+      <label>食事区分</label>
+      <select id="mealTiming">
+        <option value="朝">朝</option><option value="昼">昼</option><option value="夜">夜</option>
+        <option value="間食">間食</option><option value="プロテイン">プロテイン</option>
+      </select>
+      <button class="btn-main" id="calorieBtn" onclick="estimateCalories()" type="button" disabled>写真からカロリー推定</button>
+      <div id="calorieResult">食事写真を選択して「写真からカロリー推定」を押すと、推定カロリーとPFCを表示します。</div>
+      <div id="calorieSources" class="source-links"></div>
+    </div>
+
+    <div id="workoutFields" class="hidden">
+      <label>運動種別</label><input type="text" id="exerciseType" placeholder="例: ジム / 散歩">
+      <label>運動時間（分）</label><input type="number" id="exerciseMinutes" placeholder="例: 45" inputmode="numeric">
+    </div>
+
+    <div id="healthFields" class="hidden">
+      <label>体重（kg）</label><input type="number" id="weight" placeholder="例: 58.4" step="0.1" inputmode="decimal">
+      <label>体脂肪率（%）</label><input type="number" id="bodyFat" placeholder="例: 24.1" step="0.1" inputmode="decimal">
+      <label>お通じ</label>
+      <select id="bowelMovement"><option value="">未選択</option><option value="あり">あり</option><option value="なし">なし</option></select>
+    </div>
+
     <label>写真 (最大3枚)</label>
     <div class="photo-buttons">
       <div class="btn-sub" onclick="document.getElementById('camera').click()">📷 カメラ起動</div>
@@ -96,304 +95,180 @@
     <input type="file" id="camera" accept="image/*" capture="environment" style="display:none" onchange="handleFiles(this)">
     <input type="file" id="gallery" accept="image/*" multiple style="display:none" onchange="handleFiles(this)">
     <div id="previewContainer" class="preview-container"></div>
-    <button id="submitBtn" onclick="sendData()" disabled>認証中...</button>
+    <button class="btn-main" id="submitBtn" onclick="sendData()" disabled>認証中...</button>
   </div>
 
   <div id="pageList" class="page">
     <div class="filter-box"><div class="filter-grid">
       <select id="filterUser" onchange="applyFilters()"><option value="">全員</option></select>
-      <select id="filterCategory" onchange="applyFilters()"><option value="">全分類</option></select>
+      <select id="filterCategory" onchange="applyFilters()"><option value="">全記録</option></select>
       <select id="filterYear" onchange="applyFilters()"><option value="">年</option></select>
       <select id="filterMonth" onchange="applyFilters()"><option value="">月</option></select>
     </div></div>
-    <div id="listTotal" class="total-display">収支合計: ¥0</div>
+    <div id="listTotal" class="total-display">対象件数: 0件 / 運動時間合計: 0分</div>
     <div id="listContainer"></div>
   </div>
 
   <div id="pageSummary" class="page">
     <div class="filter-box"><div class="filter-grid">
       <select id="summaryUser" onchange="applySummaryFilters()"><option value="">全員</option></select>
-      <select id="summaryCategory" onchange="applySummaryFilters()"><option value="">全分類</option></select>
+      <select id="summaryCategory" onchange="applySummaryFilters()"><option value="">全記録</option></select>
       <select id="summaryYear" onchange="applySummaryFilters()"><option value="">年</option></select>
       <select id="summaryMonth" onchange="applySummaryFilters()"><option value="">月</option></select>
     </div></div>
-    
     <div class="chart-section">
-      <div class="chart-title">支出内訳</div>
-      <div class="chart-container doughnut-container" style="height: 320px;">
-        <canvas id="myChart"></canvas>
-      </div>
+      <div class="chart-title">記録種別の割合</div>
+      <div class="chart-container doughnut-container" style="height: 320px;"><canvas id="myChart"></canvas></div>
     </div>
+    <div class="chart-section">
+      <div class="chart-title">運動時間（分）vs 食事記録数</div>
+      <div class="chart-container" style="height: 250px;"><canvas id="barChart"></canvas></div>
+    </div>
+  </div>
 
-    <div class="chart-section">
-      <div class="chart-title">入金 vs 出金 バランス</div>
-      <div class="chart-container" style="height: 250px;">
-        <canvas id="barChart"></canvas>
-      </div>
-    </div>
+  <div id="pageAdvice" class="page">
+    <div class="filter-box"><div class="filter-grid">
+      <select id="adviceUser"><option value="">自分（ログインユーザー）</option></select>
+      <select id="advicePeriod"><option value="7">直近7日</option><option value="14">直近14日</option><option value="30">直近30日</option></select>
+    </div></div>
+    <button class="btn-main" id="aiAnalyzeBtn" onclick="runAiAnalysis()" disabled>AI分析を実行する</button>
+    <div id="aiResult">分析結果がここに表示されます。</div>
   </div>
 </div>
 
 <script>
   const LIFF_ID = "2009863857-yW268YAg";
   const GAS_URL = "https://script.google.com/macros/s/AKfycby32oRWaazKI5sq2BuelVUmOZ1ybrx_yFd1XVx-Sl4apnMNtkw9fhjKmZDSmzIPPw0a/exec";
-  
-  let currentType = "出金";
+  let recordType = "食事";
   let imageBlobs = [];
   let allData = [];
   let myChart = null;
   let myBarChart = null;
-  let userList = []; // ユーザーリスト（LINE IDと名前のマッピング用）
+  let userList = [];
+  let currentUserId = "";
+  let latestCalorieEstimate = null;
   const categories = {
-    "出金": ["電気代", "水道代", "ガス代", "CATV代", "外食", "通信費", "ガソリン代", "レンタカー代", "高速代", "交通費", "冠婚葬祭", "実家修繕", "旅費交通費", "宿泊代", "飲食代", "嗜好品", "他"],
-    "入金": ["給与", "賞与", "副業", "還付金", "お小遣い", "年金", "冠婚葬祭", "他"]
+    "食事": ["朝食", "昼食", "夕食", "間食", "プロテイン", "その他"],
+    "運動": ["ジム", "散歩", "ランニング", "自宅トレ", "ストレッチ", "その他"],
+    "体調": ["体重測定", "お通じ", "睡眠", "体調メモ", "その他"]
   };
 
-  /**
-   * 1. 起動時処理
-   */
   window.onload = function() {
     liff.init({ liffId: LIFF_ID }).then(() => {
-      if (!liff.isLoggedIn()) { liff.login(); return; }
+      if (!liff.isLoggedIn()) { liff.login(); return null; }
       return liff.getProfile();
     }).then(async (p) => {
       if (!p) return;
-      
-      // 自動ユーザー登録を実行
+      currentUserId = p.userId;
       await callGas("register", { userId: p.userId, displayName: p.displayName });
-      
-      document.getElementById('submitBtn').disabled = false;
-      document.getElementById('submitBtn').innerText = "登録する";
-      
+      document.getElementById("submitBtn").disabled = false;
+      document.getElementById("submitBtn").innerText = "記録を保存する";
+      document.getElementById("aiAnalyzeBtn").disabled = false;
+      document.getElementById("calorieBtn").disabled = false;
       updateCategoryOptions();
       initFilters();
-    }).catch(err => {
-      console.error("LIFF初期化エラー:", err);
-    });
-    document.getElementById('date').value = new Date().toISOString().split('T')[0];
+    }).catch(() => alert("LIFF初期化に失敗しました"));
+    document.getElementById("date").value = new Date().toISOString().split("T")[0];
   };
 
-  /**
-   * 2. GAS通信関数
-   */
   async function callGas(action, data) {
     const res = await fetch(GAS_URL, { method: "POST", body: JSON.stringify({ action, data }) });
-    return await res.json();
+    return res.json();
   }
 
-  /**
-   * 3. フィルタ項目の初期化
-   */
   async function initFilters() {
     const res = await callGas("getUsers", {});
-    userList = res.result || []; // [{lineId: "xxx", name: "太郎"}, ...]
-    
-    // ユーザー選択肢（値はlineId、表示は名前）
-    const userSels = [document.getElementById('filterUser'), document.getElementById('summaryUser')];
-    userSels.forEach(s => {
-      s.innerHTML = '<option value="">全員</option>';
-      userList.forEach(u => s.add(new Option(u.name, u.lineId)));
+    userList = res.result || [];
+    const userSels = [filterUser, summaryUser, adviceUser];
+    userSels.forEach((s) => {
+      s.innerHTML = s.id === "adviceUser" ? '<option value="">自分（ログインユーザー）</option>' : '<option value="">全員</option>';
+      userList.forEach((u) => s.add(new Option(u.name, u.lineId)));
     });
-    
-    // 年選択肢 (2025〜2030)
-    const yearSels = [document.getElementById('filterYear'), document.getElementById('summaryYear')];
-    yearSels.forEach(s => {
-      s.innerHTML = '<option value="">年</option>';
-      for(let y=2025; y<=2030; y++) s.add(new Option(y + "年", y));
-    });
-
-    // 月選択肢 (1〜12)
-    const monthSels = [document.getElementById('filterMonth'), document.getElementById('summaryMonth')];
-    monthSels.forEach(s => {
-      s.innerHTML = '<option value="">月</option>';
-      for(let m=1; m<=12; m++) s.add(new Option(m + "月", m));
-    });
-
-    // カテゴリ選択肢
-    const allCats = [...new Set([...categories["出金"], ...categories["入金"]])].sort();
-    const catSels = [document.getElementById('filterCategory'), document.getElementById('summaryCategory')];
-    catSels.forEach(s => {
-      s.innerHTML = '<option value="">全分類</option>';
-      allCats.forEach(c => s.add(new Option(c, c)));
-    });
+    [filterYear, summaryYear].forEach((s) => { s.innerHTML = '<option value="">年</option>'; for (let y = 2025; y <= 2035; y++) s.add(new Option(`${y}年`, y)); });
+    [filterMonth, summaryMonth].forEach((s) => { s.innerHTML = '<option value="">月</option>'; for (let m = 1; m <= 12; m++) s.add(new Option(`${m}月`, m)); });
+    const allCats = [...new Set([...categories["食事"], ...categories["運動"], ...categories["体調"]])].sort();
+    [filterCategory, summaryCategory].forEach((s) => { s.innerHTML = '<option value="">全記録</option>'; allCats.forEach((c) => s.add(new Option(c, c))); });
   }
 
-  /**
-   * 4. 入力画面ロジック
-   */
-  function setType(t) {
-    currentType = t;
-    document.getElementById('typeExpense').classList.toggle('active', t === '出金');
-    document.getElementById('typeIncome').classList.toggle('active', t === '入金');
+  function setRecordType(t) {
+    recordType = t;
+    typeMeal.classList.toggle("active", t === "食事");
+    typeWorkout.classList.toggle("active", t === "運動");
+    typeHealth.classList.toggle("active", t === "体調");
+    mealFields.classList.toggle("hidden", t !== "食事");
+    workoutFields.classList.toggle("hidden", t !== "運動");
+    healthFields.classList.toggle("hidden", t !== "体調");
     updateCategoryOptions();
   }
 
   function updateCategoryOptions() {
-    const sel = document.getElementById('category');
-    sel.innerHTML = "";
-    categories[currentType].forEach(c => sel.add(new Option(c, c)));
+    category.innerHTML = "";
+    categories[recordType].forEach((c) => category.add(new Option(c, c)));
   }
 
-  /**
-   * 5. ページ切り替え
-   */
   function showPage(p) {
-    document.querySelectorAll('.page, .tab').forEach(el => el.classList.remove('active'));
-    document.getElementById('page' + p.charAt(0).toUpperCase() + p.slice(1)).classList.add('active');
-    document.querySelectorAll('.tab').forEach((t, i) => t.classList.toggle('active', (p==='input'&&i===0)||(p==='list'&&i===1)||(p==='summary'&&i===2)));
-    if (p !== 'input') fetchAllData(p);
+    document.querySelectorAll(".page, .tab").forEach((el) => el.classList.remove("active"));
+    document.getElementById("page" + p.charAt(0).toUpperCase() + p.slice(1)).classList.add("active");
+    document.querySelectorAll(".tab").forEach((t, i) => t.classList.toggle("active", (p === "input" && i === 0) || (p === "list" && i === 1) || (p === "summary" && i === 2) || (p === "advice" && i === 3)));
+    if (p !== "input") fetchAllData(p);
   }
 
-  /**
-   * 6. 履歴・サマリーデータ処理
-   */
   async function fetchAllData(mode) {
-    const res = await callGas("getList", {});
+    const res = await callGas("getRecords", {});
     allData = res.result || [];
-    if (mode === 'list') applyFilters();
-    if (mode === 'summary') applySummaryFilters();
+    if (mode === "list") applyFilters();
+    if (mode === "summary") applySummaryFilters();
   }
 
   function applyFilters() {
-    const u = document.getElementById('filterUser').value; // lineId
-    const c = document.getElementById('filterCategory').value;
-    const y = document.getElementById('filterYear').value;
-    const m = document.getElementById('filterMonth').value;
-    const filtered = allData.filter(d => {
-      const dt = new Date(d.date);
-      return (!u || d.lineId === u) && (!c || d.category === c) && (!y || dt.getFullYear() == y) && (!m || (dt.getMonth()+1) == m);
+    const filtered = allData.filter((d) => {
+      const dt = new Date(d.recordDate || d.date);
+      return (!filterUser.value || d.lineId === filterUser.value) &&
+        (!filterCategory.value || d.category === filterCategory.value || d.recordType === filterCategory.value) &&
+        (!filterYear.value || dt.getFullYear() == filterYear.value) &&
+        (!filterMonth.value || dt.getMonth() + 1 == filterMonth.value);
     });
     renderList(filtered);
   }
 
   function renderList(data) {
-    const container = document.getElementById('listContainer');
-    let total = 0;
-    container.innerHTML = "";
-    data.forEach(item => {
-      const isInc = item.type === "入金";
-      total += isInc ? item.amount : -item.amount;
-      const div = document.createElement('div');
-      div.className = 'list-item';
-      
-      // 画像ボタンの生成 (別タブで開く方式)
-      const imageButtons = item.imageUrls.map((url, index) => {
-        return `<button class="image-link-btn" onclick="window.open('${url}', '_blank')">📷 写真${index+1}</button>`;
-      }).join('');
-
-      div.innerHTML = `
-        <div>
-          <div class="item-main">${item.shop} [${item.category}]</div>
-          <div style="font-size:11px; color:#999;">${item.date} (${item.userName})</div>
-        </div>
-        <div style="text-align:right">
-          <div class="${isInc?'income-text':'expense-text'}" style="font-weight:bold;">${isInc?'+':'-'}¥${item.amount.toLocaleString()}</div>
-          <div style="display:flex; justify-content:flex-end; gap:2px; margin-top:6px;">
-            ${imageButtons}
-          </div>
-        </div>`;
-      container.appendChild(div);
+    listContainer.innerHTML = "";
+    let exerciseTotal = 0;
+    data.forEach((item) => {
+      const minutes = Number(item.exerciseMinutes || 0);
+      exerciseTotal += minutes;
+      const imageUrls = Array.isArray(item.imageUrls) ? item.imageUrls : [];
+      const imageButtons = imageUrls.map((url, idx) => `<button class="image-link-btn" onclick="window.open('${url}','_blank')">📷 写真${idx + 1}</button>`).join("");
+      const kcal = Number(item.estimatedCalories || 0);
+      const div = document.createElement("div");
+      div.className = "list-item";
+      div.innerHTML = `<div><div>${item.memo || "メモなし"} [${item.category || item.recordType || "-"}]</div><div style="font-size:11px;color:#999;">${item.recordDate || ""} (${item.userName || "不明"})</div></div>
+      <div style="text-align:right;"><div class="type-label">${item.recordType || "-"}</div><div class="metric-text">${kcal > 0 ? `推定 ${kcal}kcal` : (minutes > 0 ? `運動 ${minutes}分` : (item.weight ? `体重 ${item.weight}kg` : "記録済み"))}</div><div style="margin-top:6px;">${imageButtons}</div></div>`;
+      listContainer.appendChild(div);
     });
-    document.getElementById('listTotal').innerText = `収支合計: ¥${total.toLocaleString()}`;
+    listTotal.innerText = `対象件数: ${data.length}件 / 運動時間合計: ${exerciseTotal}分`;
   }
 
-  /**
-   * 7. サマリー表示
-   */
   function applySummaryFilters() {
-    const u = document.getElementById('summaryUser').value; // lineId
-    const c = document.getElementById('summaryCategory').value;
-    const y = document.getElementById('summaryYear').value;
-    const m = document.getElementById('summaryMonth').value;
-    
-    const balanceData = allData.filter(d => {
-      const dt = new Date(d.date);
-      return (!u || d.lineId === u) && (!y || dt.getFullYear() == y) && (!m || (dt.getMonth()+1) == m);
+    const baseData = allData.filter((d) => {
+      const dt = new Date(d.recordDate || d.date);
+      return (!summaryUser.value || d.lineId === summaryUser.value) && (!summaryYear.value || dt.getFullYear() == summaryYear.value) && (!summaryMonth.value || dt.getMonth() + 1 == summaryMonth.value);
     });
-
-    const expenseData = balanceData.filter(d => d.type === "出金" && (!c || d.category === c));
-    
-    // LINE IDから名前を取得
-    let centerName = "全員";
-    if (u) {
-      const user = userList.find(usr => usr.lineId === u);
-      centerName = user ? user.name : u;
-    }
-    
-    let period = (y ? y + "年" : "") + (m ? m + "月" : "") || "全期間";
-    renderSummary(expenseData, balanceData, centerName, c, period);
-  }
-
-  function renderSummary(expenseData, balanceData, name, cat, period) {
-    const stats = {}; let expTotal = 0;
-    expenseData.forEach(d => { expTotal += d.amount; stats[d.category] = (stats[d.category] || 0) + d.amount; });
-    
-    let incSum = 0, expSum = 0;
-    balanceData.forEach(d => { if (d.type === "入金") incSum += d.amount; else expSum += d.amount; });
-
+    const targetData = baseData.filter((d) => !summaryCategory.value || d.category === summaryCategory.value || d.recordType === summaryCategory.value);
+    const stats = {};
+    targetData.forEach((d) => { const key = d.recordType || "未設定"; stats[key] = (stats[key] || 0) + 1; });
+    const workoutMinutes = baseData.filter((d) => d.recordType === "運動").reduce((sum, d) => sum + (Number(d.exerciseMinutes) || 0), 0);
+    const mealCount = baseData.filter((d) => d.recordType === "食事").length;
     if (myChart) myChart.destroy();
-    const ctxD = document.getElementById('myChart').getContext('2d');
-    myChart = new Chart(ctxD, {
-      type: 'doughnut',
-      data: {
-        labels: Object.keys(stats),
-        datasets: [{
-          data: Object.values(stats),
-          backgroundColor: ['#FF6384','#36A2EB','#FFCE56','#4BC0C0','#9966FF','#FF9F40','#8BC34A','#F44336','#E91E63','#9C27B0']
-        }]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        cutout: '65%',
-        plugins: {
-          legend: { display: true, position: 'bottom', labels: { boxWidth: 12, font: { size: 10 } } },
-          tooltip: { callbacks: { label: (c) => `${c.label}: ¥${c.raw.toLocaleString()} (${((c.raw/expTotal)*100).toFixed(1)}%)` } }
-        }
-      },
-      plugins: [{
-        id: 'centerText',
-        afterDatasetsDraw(chart) {
-          const { ctx } = chart; ctx.save();
-          const x = chart.getDatasetMeta(0).data[0].x, y = chart.getDatasetMeta(0).data[0].y;
-          ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-          ctx.font = 'bold 14px sans-serif'; ctx.fillStyle = '#333';
-          ctx.fillText(name + (cat ? " ["+cat+"]" : ""), x, y - 10);
-          ctx.font = '11px sans-serif'; ctx.fillStyle = '#999';
-          ctx.fillText(period, x, y + 12); ctx.restore();
-        }
-      }]
-    });
-
+    myChart = new Chart(myChartCtx(), { type: "doughnut", data: { labels: Object.keys(stats), datasets: [{ data: Object.values(stats) }] }, options: { responsive: true, maintainAspectRatio: false } });
     if (myBarChart) myBarChart.destroy();
-    const ctxB = document.getElementById('barChart').getContext('2d');
-    myBarChart = new Chart(ctxB, {
-      type: 'bar',
-      data: {
-        labels: ['入金', '出金'],
-        datasets: [{
-          data: [incSum, expSum],
-          backgroundColor: ['#007bff', '#d9534f'],
-          borderRadius: 6
-        }]
-      },
-      options: {
-        responsive: true, maintainAspectRatio: false,
-        plugins: { legend: { display: false } },
-        scales: {
-          y: { beginAtZero: true, ticks: { font: { size: 10 }, callback: (v) => '¥' + v.toLocaleString() } },
-          x: { ticks: { font: { size: 12, weight: 'bold' } } }
-        }
-      }
-    });
+    myBarChart = new Chart(barChartCtx(), { type: "bar", data: { labels: ["運動時間(分)", "食事記録数"], datasets: [{ data: [workoutMinutes, mealCount], backgroundColor: ["#007bff", "#d9534f"] }] }, options: { responsive: true, maintainAspectRatio: false } });
   }
+  const myChartCtx = () => document.getElementById("myChart").getContext("2d");
+  const barChartCtx = () => document.getElementById("barChart").getContext("2d");
 
-  /**
-   * 8. 写真アップロード・送信処理
-   */
   function handleFiles(input) {
-    const files = Array.from(input.files);
-    files.forEach(file => {
+    Array.from(input.files).forEach((file) => {
       if (imageBlobs.length >= 3) return;
       const reader = new FileReader();
       reader.onload = (e) => { imageBlobs.push(e.target.result); renderPreviews(); };
@@ -403,36 +278,88 @@
   }
 
   function renderPreviews() {
-    const container = document.getElementById('previewContainer');
-    container.innerHTML = "";
+    previewContainer.innerHTML = "";
     imageBlobs.forEach((blob, i) => {
-      const div = document.createElement('div');
+      const div = document.createElement("div");
       div.className = "preview-wrapper";
       div.innerHTML = `<img src="${blob}" class="preview-img"><div class="del-btn" onclick="removeImg(${i})">×</div>`;
-      container.appendChild(div);
+      previewContainer.appendChild(div);
     });
   }
-
   function removeImg(i) { imageBlobs.splice(i, 1); renderPreviews(); }
 
+  async function estimateCalories() {
+    if (recordType !== "食事") return alert("食事タブで実行してください");
+    if (!imageBlobs.length) return alert("先に食事写真を選択してください");
+    calorieBtn.disabled = true;
+    calorieBtn.innerText = "推定中...";
+    calorieResult.innerText = "写真を解析しています...";
+    calorieSources.innerHTML = "";
+    try {
+      const res = await callGas("estimateMealCalories", {
+        imageBlobs: imageBlobs,
+        memo: memo.value || "",
+        mealTiming: mealTiming.value || ""
+      });
+      if (res.status !== "success") throw new Error("estimate failed");
+      latestCalorieEstimate = res.result;
+      const r = res.result || {};
+      calorieResult.innerText = `推定カロリー: ${Number(r.estimatedCalories || 0)} kcal\nP: ${Number(r.protein || 0)}g / F: ${Number(r.fat || 0)}g / C: ${Number(r.carbohydrate || 0)}g\n根拠: ${r.basis || "食品DBと写真推定の組み合わせ"}`;
+      const refs = Array.isArray(r.referenceSources) ? r.referenceSources : [];
+      calorieSources.innerHTML = refs.map((u) => `<div><a href="${u}" target="_blank" rel="noopener noreferrer">${u}</a></div>`).join("");
+    } catch (_) {
+      calorieResult.innerText = "推定に失敗しました。時間をおいて再実行してください。";
+    } finally {
+      calorieBtn.disabled = false;
+      calorieBtn.innerText = "写真からカロリー推定";
+    }
+  }
+
   async function sendData() {
-    const amt = document.getElementById('amount').value;
-    if (!amt) return alert("金額を入力してください");
-    const btn = document.getElementById('submitBtn');
-    btn.disabled = true; btn.innerText = "送信中...";
-    
+    const text = memo.value.trim();
+    if (!text && recordType === "食事") return alert("食事内容をメモに入力してください");
+    submitBtn.disabled = true;
+    submitBtn.innerText = "送信中...";
     try {
       const p = await liff.getProfile();
-      const res = await callGas("upload", {
-        lineId: p.userId, userName: p.displayName, type: currentType, amount: Number(amt),
-        category: document.getElementById('category').value, shop: document.getElementById('shop').value || "未設定",
-        date: document.getElementById('date').value, imageBlobs: imageBlobs
-      });
-      if (res.status === "success") { alert("完了！"); location.reload(); }
-      else { throw new Error("APIエラー"); }
-    } catch (e) {
+      const payload = {
+        lineId: p.userId, userName: p.displayName, recordType: recordType, category: category.value, mealTiming: mealTiming.value,
+        memo: text || "未入力", recordDate: date.value, exerciseType: exerciseType.value || "", exerciseMinutes: Number(exerciseMinutes.value || 0),
+        weight: Number(weight.value || 0), bodyFat: Number(bodyFat.value || 0), bowelMovement: bowelMovement.value || "", imageBlobs: imageBlobs
+      };
+      if (latestCalorieEstimate) {
+        payload.estimatedCalories = Number(latestCalorieEstimate.estimatedCalories || 0);
+        payload.protein = Number(latestCalorieEstimate.protein || 0);
+        payload.fat = Number(latestCalorieEstimate.fat || 0);
+        payload.carbohydrate = Number(latestCalorieEstimate.carbohydrate || 0);
+        payload.calorieBasis = latestCalorieEstimate.basis || "";
+      }
+      const res = await callGas("uploadRecord", payload);
+      if (res.status !== "success") throw new Error("upload failed");
+      alert("記録完了！");
+      location.reload();
+    } catch (_) {
       alert("送信に失敗しました");
-      btn.disabled = false; btn.innerText = "登録する";
+      submitBtn.disabled = false;
+      submitBtn.innerText = "記録を保存する";
+    }
+  }
+
+  async function runAiAnalysis() {
+    aiAnalyzeBtn.disabled = true;
+    aiAnalyzeBtn.innerText = "分析中...";
+    aiResult.innerText = "AIが分析しています...";
+    try {
+      const selectedUser = adviceUser.value || currentUserId;
+      const periodDays = Number(advicePeriod.value || 7);
+      const res = await callGas("analyzeHealth", { lineId: selectedUser, periodDays: periodDays });
+      if (res.status !== "success") throw new Error("analysis failed");
+      aiResult.innerText = (res.result && res.result.adviceText) || res.adviceText || "分析結果が空でした。";
+    } catch (_) {
+      aiResult.innerText = "分析に失敗しました。時間をおいて再実行してください。";
+    } finally {
+      aiAnalyzeBtn.disabled = false;
+      aiAnalyzeBtn.innerText = "AI分析を実行する";
     }
   }
 </script>
