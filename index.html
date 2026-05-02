@@ -3,46 +3,74 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ダイエット管理アプリ v1.1.0</title>
+  <title>ダイエット管理アプリ v1.2.0</title>
   <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
-    :root { --line-green: #06C755; --line-blue: #007bff; --bg-gray: #f0f2f5; }
-    body { font-family: -apple-system, sans-serif; background: var(--bg-gray); margin: 0; padding: 10px; }
+    :root { --green: #06C755; --blue: #007bff; --red: #d9534f; --bg: #f0f2f5; }
+    * { box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); margin: 0; padding: 10px; }
     .container { background: white; border-radius: 16px; padding: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); max-width: 520px; margin: auto; }
+
     .tab-menu { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; background: #eee; border-radius: 10px; padding: 4px; margin-bottom: 15px; gap: 4px; }
-    .tab { padding: 10px 6px; text-align: center; cursor: pointer; border-radius: 8px; color: #666; font-size: 13px; }
-    .tab.active { background: white; font-weight: bold; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+    .tab { padding: 10px 6px; text-align: center; cursor: pointer; border-radius: 8px; color: #666; font-size: 13px; transition: all 0.2s; }
+    .tab.active { background: white; font-weight: bold; color: #333; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+
     .type-menu { display: grid; grid-template-columns: 1fr 1fr 1fr; background: #eee; border-radius: 10px; padding: 4px; margin-bottom: 15px; gap: 4px; }
-    .type-btn { padding: 10px; text-align: center; cursor: pointer; border-radius: 8px; color: #666; font-size: 13px; }
+    .type-btn { padding: 10px; text-align: center; cursor: pointer; border-radius: 8px; color: #666; font-size: 13px; transition: all 0.2s; }
     .type-btn.active { background: white; color: #333; font-weight: bold; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+
     .page { display: none; }
     .page.active { display: block; }
+
     label { display: block; margin: 10px 0 5px; font-size: 13px; color: #555; font-weight: bold; }
-    input, select, button { width: 100%; box-sizing: border-box; }
-    input, select { padding: 10px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; margin-bottom: 8px; }
-    .btn-main { background: var(--line-green); color: white; border: none; padding: 14px; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; }
-    .btn-main:disabled { background: #ccc; }
+    input, select { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; margin-bottom: 8px; }
+
+    .btn-main { width: 100%; background: var(--green); color: white; border: none; padding: 14px; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; transition: opacity 0.2s; }
+    .btn-main:disabled { background: #ccc; cursor: not-allowed; }
+    .btn-main:not(:disabled):hover { opacity: 0.85; }
     .btn-sub { background: #666; color: white; padding: 10px; border-radius: 8px; text-align: center; font-size: 12px; font-weight: bold; cursor: pointer; }
+
     .photo-buttons { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
-    .preview-container { display: flex; gap: 5px; margin-bottom: 10px; }
-    .preview-wrapper { position: relative; width: 32%; }
+    .preview-container { display: flex; gap: 5px; margin-bottom: 10px; flex-wrap: wrap; }
+    .preview-wrapper { position: relative; width: calc(33% - 4px); }
     .preview-img { width: 100%; height: 80px; object-fit: cover; border-radius: 6px; border: 1px solid #ddd; }
-    .del-btn { position: absolute; top: -5px; right: -5px; background: red; color: white; border-radius: 50%; width: 20px; height: 20px; font-size: 12px; line-height: 20px; text-align: center; cursor: pointer; }
+    .del-btn { position: absolute; top: -6px; right: -6px; background: var(--red); color: white; border-radius: 50%; width: 22px; height: 22px; font-size: 14px; line-height: 22px; text-align: center; cursor: pointer; font-weight: bold; }
+
     .filter-box { background: #f9f9f9; padding: 10px; border-radius: 10px; margin-bottom: 15px; border: 1px solid #eee; }
     .filter-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-    .total-display { font-size: 15px; font-weight: bold; text-align: center; color: #333; margin: 10px 0; border-bottom: 2px solid var(--line-green); padding-bottom: 5px; }
+    .filter-grid select { margin-bottom: 0; }
+
+    .stats-bar { background: #f0fff4; border: 1px solid #b2dfdb; border-radius: 10px; padding: 10px; margin-bottom: 12px; }
+    .stats-bar-title { font-size: 12px; color: #555; font-weight: bold; margin-bottom: 6px; }
+    .stats-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; text-align: center; }
+    .stat-item { background: white; border-radius: 8px; padding: 8px 4px; }
+    .stat-value { font-size: 16px; font-weight: bold; color: var(--green); }
+    .stat-label { font-size: 10px; color: #888; margin-top: 2px; }
+
+    .total-display { font-size: 15px; font-weight: bold; text-align: center; color: #333; margin: 10px 0; border-bottom: 2px solid var(--green); padding-bottom: 5px; }
+
     .list-item { border-bottom: 1px solid #f0f0f0; padding: 12px 0; display: flex; justify-content: space-between; gap: 8px; }
-    .metric-text { color: var(--line-blue); font-weight: bold; font-size: 13px; }
-    .type-label { color: #d9534f; font-weight: bold; font-size: 12px; }
-    .image-link-btn { background: #f0f0f0; border: 1px solid #ccc; border-radius: 4px; padding: 4px 8px; font-size: 11px; cursor: pointer; }
-    .chart-section { margin-top: 20px; text-align: center; }
-    .chart-title { font-size: 14px; font-weight: bold; color: #666; margin-bottom: 10px; }
-    .chart-container { position: relative; width: 100%; margin: auto; margin-bottom: 30px; }
-    .doughnut-container { width: min(100%, 320px); margin-left: auto; margin-right: auto; }
+    .list-item:last-child { border-bottom: none; }
+    .metric-text { color: var(--blue); font-weight: bold; font-size: 13px; }
+    .type-label { color: var(--red); font-weight: bold; font-size: 11px; margin-bottom: 2px; }
+    .image-link-btn { background: #f0f0f0; border: 1px solid #ccc; border-radius: 4px; padding: 4px 8px; font-size: 11px; cursor: pointer; text-decoration: none; color: #333; margin-right: 4px; }
+
+    .summary-kpi { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
+    .kpi-card { background: #f9f9f9; border-radius: 10px; padding: 12px; text-align: center; }
+    .kpi-value { font-size: 22px; font-weight: bold; color: #333; }
+    .kpi-label { font-size: 11px; color: #888; margin-top: 4px; }
+
+    .chart-section { margin-top: 16px; }
+    .chart-title { font-size: 14px; font-weight: bold; color: #555; margin-bottom: 10px; padding-left: 8px; border-left: 3px solid var(--green); }
+    .chart-wrap { position: relative; width: 100%; margin-bottom: 28px; }
+    .doughnut-wrap { width: min(100%, 300px); margin: 0 auto 28px; }
+
+    #aiResult, #calorieResult { background: #f9f9f9; border: 1px solid #eee; border-radius: 10px; padding: 12px; margin-top: 12px; white-space: pre-wrap; line-height: 1.6; font-size: 14px; min-height: 100px; }
+    .source-links { margin-top: 8px; font-size: 12px; color: #888; }
+    .source-links a { color: var(--blue); }
+    .empty-state { text-align: center; color: #aaa; padding: 30px 0; font-size: 14px; }
     .hidden { display: none; }
-    #aiResult, #calorieResult { background: #f9f9f9; border: 1px solid #eee; border-radius: 10px; padding: 12px; margin-top: 12px; white-space: pre-wrap; line-height: 1.5; font-size: 14px; min-height: 100px; }
-    .source-links { margin-top: 8px; font-size: 12px; }
   </style>
 </head>
 <body>
@@ -54,40 +82,58 @@
     <div class="tab" onclick="showPage('advice')">AI助言</div>
   </div>
 
+  <!-- 記録タブ -->
   <div id="pageInput" class="page active">
     <div class="type-menu">
       <div id="typeMeal" class="type-btn active" onclick="setRecordType('食事')">食事</div>
       <div id="typeWorkout" class="type-btn" onclick="setRecordType('運動')">運動</div>
       <div id="typeHealth" class="type-btn" onclick="setRecordType('体調')">体調</div>
     </div>
-    <label>分類</label><select id="category"></select>
-    <label>メモ</label><input type="text" id="memo" placeholder="例: 鶏胸肉サラダ / ジムで筋トレ30分">
-    <label>日付</label><input type="date" id="date">
+
+    <label>分類</label>
+    <select id="category"></select>
+
+    <label>メモ</label>
+    <input type="text" id="memo" placeholder="例: 鶏胸肉サラダ / ジムで筋トレ30分">
+
+    <label>日付</label>
+    <input type="date" id="date">
 
     <div id="mealFields">
       <label>食事区分</label>
       <select id="mealTiming">
-        <option value="朝">朝</option><option value="昼">昼</option><option value="夜">夜</option>
-        <option value="間食">間食</option><option value="プロテイン">プロテイン</option>
+        <option value="朝">朝</option>
+        <option value="昼">昼</option>
+        <option value="夜">夜</option>
+        <option value="間食">間食</option>
+        <option value="プロテイン">プロテイン</option>
       </select>
-      <button class="btn-main" id="calorieBtn" onclick="estimateCalories()" type="button" disabled>写真からカロリー推定</button>
+      <button class="btn-main" id="calorieBtn" onclick="estimateCalories()" type="button" disabled style="margin-bottom:8px;">写真からカロリー推定</button>
       <div id="calorieResult">食事写真を選択して「写真からカロリー推定」を押すと、推定カロリーとPFCを表示します。</div>
       <div id="calorieSources" class="source-links"></div>
     </div>
 
     <div id="workoutFields" class="hidden">
-      <label>運動種別</label><input type="text" id="exerciseType" placeholder="例: ジム / 散歩">
-      <label>運動時間（分）</label><input type="number" id="exerciseMinutes" placeholder="例: 45" inputmode="numeric">
+      <label>運動種別</label>
+      <input type="text" id="exerciseType" placeholder="例: ジム / 散歩">
+      <label>運動時間（分）</label>
+      <input type="number" id="exerciseMinutes" placeholder="例: 45" inputmode="numeric">
     </div>
 
     <div id="healthFields" class="hidden">
-      <label>体重（kg）</label><input type="number" id="weight" placeholder="例: 58.4" step="0.1" inputmode="decimal">
-      <label>体脂肪率（%）</label><input type="number" id="bodyFat" placeholder="例: 24.1" step="0.1" inputmode="decimal">
+      <label>体重（kg）</label>
+      <input type="number" id="weight" placeholder="例: 58.4" step="0.1" inputmode="decimal">
+      <label>体脂肪率（%）</label>
+      <input type="number" id="bodyFat" placeholder="例: 24.1" step="0.1" inputmode="decimal">
       <label>お通じ</label>
-      <select id="bowelMovement"><option value="">未選択</option><option value="あり">あり</option><option value="なし">なし</option></select>
+      <select id="bowelMovement">
+        <option value="">未選択</option>
+        <option value="あり">あり</option>
+        <option value="なし">なし</option>
+      </select>
     </div>
 
-    <label>写真 (最大3枚)</label>
+    <label>写真（最大3枚）</label>
     <div class="photo-buttons">
       <div class="btn-sub" onclick="document.getElementById('camera').click()">📷 カメラ起動</div>
       <div class="btn-sub" onclick="document.getElementById('gallery').click()">📁 写真選択</div>
@@ -95,42 +141,97 @@
     <input type="file" id="camera" accept="image/*" capture="environment" style="display:none" onchange="handleFiles(this)">
     <input type="file" id="gallery" accept="image/*" multiple style="display:none" onchange="handleFiles(this)">
     <div id="previewContainer" class="preview-container"></div>
+
     <button class="btn-main" id="submitBtn" onclick="sendData()" disabled>認証中...</button>
   </div>
 
+  <!-- 履歴タブ -->
   <div id="pageList" class="page">
-    <div class="filter-box"><div class="filter-grid">
-      <select id="filterUser" onchange="applyFilters()"><option value="">全員</option></select>
-      <select id="filterCategory" onchange="applyFilters()"><option value="">全記録</option></select>
-      <select id="filterYear" onchange="applyFilters()"><option value="">年</option></select>
-      <select id="filterMonth" onchange="applyFilters()"><option value="">月</option></select>
-    </div></div>
+    <div class="filter-box">
+      <div class="filter-grid">
+        <select id="filterUser" onchange="applyFilters()"><option value="">全員</option></select>
+        <select id="filterCategory" onchange="applyFilters()"><option value="">全記録</option></select>
+        <select id="filterYear" onchange="applyFilters()"><option value="">年</option></select>
+        <select id="filterMonth" onchange="applyFilters()"><option value="">月</option></select>
+      </div>
+    </div>
+    <div id="monthlyStats" class="stats-bar hidden">
+      <div class="stats-bar-title">当月サマリー</div>
+      <div class="stats-grid">
+        <div class="stat-item">
+          <div class="stat-value" id="statWorkoutCount">-</div>
+          <div class="stat-label">運動回数</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value" id="statWeightDiff">-</div>
+          <div class="stat-label">体重変化</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value" id="statBowelRate">-</div>
+          <div class="stat-label">お通じ率</div>
+        </div>
+      </div>
+    </div>
     <div id="listTotal" class="total-display">対象件数: 0件 / 運動時間合計: 0分</div>
     <div id="listContainer"></div>
   </div>
 
+  <!-- サマリータブ -->
   <div id="pageSummary" class="page">
-    <div class="filter-box"><div class="filter-grid">
-      <select id="summaryUser" onchange="applySummaryFilters()"><option value="">全員</option></select>
-      <select id="summaryCategory" onchange="applySummaryFilters()"><option value="">全記録</option></select>
-      <select id="summaryYear" onchange="applySummaryFilters()"><option value="">年</option></select>
-      <select id="summaryMonth" onchange="applySummaryFilters()"><option value="">月</option></select>
-    </div></div>
+    <div class="filter-box">
+      <div class="filter-grid">
+        <select id="summaryUser" onchange="applySummaryFilters()"><option value="">全員</option></select>
+        <select id="summaryCategory" onchange="applySummaryFilters()"><option value="">全記録</option></select>
+        <select id="summaryYear" onchange="applySummaryFilters()"><option value="">年</option></select>
+        <select id="summaryMonth" onchange="applySummaryFilters()"><option value="">月</option></select>
+      </div>
+    </div>
+
+    <div id="summaryKpi" class="summary-kpi hidden">
+      <div class="kpi-card">
+        <div class="kpi-value" id="kpiWeightDiff">-</div>
+        <div class="kpi-label">体重増減 (kg)</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-value" id="kpiWorkoutTotal">-</div>
+        <div class="kpi-label">運動時間合計 (分)</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-value" id="kpiBowelCount">-</div>
+        <div class="kpi-label">お通じ「あり」回数</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-value" id="kpiMealCount">-</div>
+        <div class="kpi-label">食事記録件数</div>
+      </div>
+    </div>
+
     <div class="chart-section">
-      <div class="chart-title">記録種別の割合</div>
-      <div class="chart-container doughnut-container" style="height: 320px;"><canvas id="myChart"></canvas></div>
+      <div class="chart-title">体重推移（kg）</div>
+      <div class="chart-wrap" style="height:220px;"><canvas id="weightChart"></canvas></div>
     </div>
     <div class="chart-section">
       <div class="chart-title">運動時間（分）vs 食事記録数</div>
-      <div class="chart-container" style="height: 250px;"><canvas id="barChart"></canvas></div>
+      <div class="chart-wrap" style="height:220px;"><canvas id="barChart"></canvas></div>
+    </div>
+    <div class="chart-section">
+      <div class="chart-title">記録種別の割合</div>
+      <div class="doughnut-wrap" style="height:280px;"><canvas id="myChart"></canvas></div>
     </div>
   </div>
 
+  <!-- AI助言タブ -->
   <div id="pageAdvice" class="page">
-    <div class="filter-box"><div class="filter-grid">
-      <select id="adviceUser"><option value="">自分（ログインユーザー）</option></select>
-      <select id="advicePeriod"><option value="7">直近7日</option><option value="14">直近14日</option><option value="30">直近30日</option></select>
-    </div></div>
+    <div class="filter-box">
+      <div class="filter-grid">
+        <select id="adviceUser"><option value="">自分（ログインユーザー）</option></select>
+        <select id="advicePeriod">
+          <option value="7">直近7日</option>
+          <option value="14">直近14日</option>
+          <option value="30">直近30日</option>
+        </select>
+      </div>
+    </div>
     <button class="btn-main" id="aiAnalyzeBtn" onclick="runAiAnalysis()" disabled>AI分析を実行する</button>
     <div id="aiResult">分析結果がここに表示されます。</div>
   </div>
@@ -139,21 +240,24 @@
 <script>
   const LIFF_ID = "2009863857-yW268YAg";
   const GAS_URL = "https://script.google.com/macros/s/AKfycby32oRWaazKI5sq2BuelVUmOZ1ybrx_yFd1XVx-Sl4apnMNtkw9fhjKmZDSmzIPPw0a/exec";
+
   let recordType = "食事";
   let imageBlobs = [];
   let allData = [];
-  let myChart = null;
-  let myBarChart = null;
+  let chartDoughnut = null;
+  let chartBar = null;
+  let chartWeight = null;
   let userList = [];
   let currentUserId = "";
   let latestCalorieEstimate = null;
+
   const categories = {
     "食事": ["朝食", "昼食", "夕食", "間食", "プロテイン", "その他"],
     "運動": ["ジム", "散歩", "ランニング", "自宅トレ", "ストレッチ", "その他"],
     "体調": ["体重測定", "お通じ", "睡眠", "体調メモ", "その他"]
   };
 
-  window.onload = function() {
+  window.onload = function () {
     liff.init({ liffId: LIFF_ID }).then(() => {
       if (!liff.isLoggedIn()) { liff.login(); return null; }
       return liff.getProfile();
@@ -161,14 +265,14 @@
       if (!p) return;
       currentUserId = p.userId;
       await callGas("register", { userId: p.userId, displayName: p.displayName });
-      document.getElementById("submitBtn").disabled = false;
-      document.getElementById("submitBtn").innerText = "記録を保存する";
-      document.getElementById("aiAnalyzeBtn").disabled = false;
-      document.getElementById("calorieBtn").disabled = false;
+      submitBtn.disabled = false;
+      submitBtn.innerText = "記録を保存する";
+      aiAnalyzeBtn.disabled = false;
+      calorieBtn.disabled = false;
       updateCategoryOptions();
       initFilters();
     }).catch(() => alert("LIFF初期化に失敗しました"));
-    document.getElementById("date").value = new Date().toISOString().split("T")[0];
+    date.value = new Date().toISOString().split("T")[0];
   };
 
   async function callGas(action, data) {
@@ -179,15 +283,23 @@
   async function initFilters() {
     const res = await callGas("getUsers", {});
     userList = res.result || [];
-    const userSels = [filterUser, summaryUser, adviceUser];
-    userSels.forEach((s) => {
+    [filterUser, summaryUser, adviceUser].forEach((s) => {
       s.innerHTML = s.id === "adviceUser" ? '<option value="">自分（ログインユーザー）</option>' : '<option value="">全員</option>';
       userList.forEach((u) => s.add(new Option(u.name, u.lineId)));
     });
-    [filterYear, summaryYear].forEach((s) => { s.innerHTML = '<option value="">年</option>'; for (let y = 2025; y <= 2035; y++) s.add(new Option(`${y}年`, y)); });
-    [filterMonth, summaryMonth].forEach((s) => { s.innerHTML = '<option value="">月</option>'; for (let m = 1; m <= 12; m++) s.add(new Option(`${m}月`, m)); });
+    [filterYear, summaryYear].forEach((s) => {
+      s.innerHTML = '<option value="">年</option>';
+      for (let y = 2025; y <= 2035; y++) s.add(new Option(`${y}年`, y));
+    });
+    [filterMonth, summaryMonth].forEach((s) => {
+      s.innerHTML = '<option value="">月</option>';
+      for (let m = 1; m <= 12; m++) s.add(new Option(`${m}月`, m));
+    });
     const allCats = [...new Set([...categories["食事"], ...categories["運動"], ...categories["体調"]])].sort();
-    [filterCategory, summaryCategory].forEach((s) => { s.innerHTML = '<option value="">全記録</option>'; allCats.forEach((c) => s.add(new Option(c, c))); });
+    [filterCategory, summaryCategory].forEach((s) => {
+      s.innerHTML = '<option value="">全記録</option>';
+      allCats.forEach((c) => s.add(new Option(c, c)));
+    });
   }
 
   function setRecordType(t) {
@@ -207,9 +319,10 @@
   }
 
   function showPage(p) {
-    document.querySelectorAll(".page, .tab").forEach((el) => el.classList.remove("active"));
+    document.querySelectorAll(".page").forEach((el) => el.classList.remove("active"));
+    document.querySelectorAll(".tab").forEach((t) => t.classList.remove("active"));
     document.getElementById("page" + p.charAt(0).toUpperCase() + p.slice(1)).classList.add("active");
-    document.querySelectorAll(".tab").forEach((t, i) => t.classList.toggle("active", (p === "input" && i === 0) || (p === "list" && i === 1) || (p === "summary" && i === 2) || (p === "advice" && i === 3)));
+    document.querySelectorAll(".tab")[{ input: 0, list: 1, summary: 2, advice: 3 }[p]].classList.add("active");
     if (p !== "input") fetchAllData(p);
   }
 
@@ -220,6 +333,8 @@
     if (mode === "summary") applySummaryFilters();
   }
 
+  // ---- 履歴タブ ----
+
   function applyFilters() {
     const filtered = allData.filter((d) => {
       const dt = new Date(d.recordDate || d.date);
@@ -228,44 +343,186 @@
         (!filterYear.value || dt.getFullYear() == filterYear.value) &&
         (!filterMonth.value || dt.getMonth() + 1 == filterMonth.value);
     });
+    renderMonthlyStats(filtered);
     renderList(filtered);
+  }
+
+  function renderMonthlyStats(data) {
+    const el = document.getElementById("monthlyStats");
+    if (!data.length) { el.classList.add("hidden"); return; }
+    el.classList.remove("hidden");
+
+    const workoutCount = data.filter((d) => d.recordType === "運動").length;
+
+    const weightRows = data.filter((d) => Number(d.weight) > 0)
+      .sort((a, b) => String(a.recordDate).localeCompare(String(b.recordDate)));
+    let weightDiffText = "-";
+    if (weightRows.length >= 2) {
+      const diff = Number(weightRows[weightRows.length - 1].weight) - Number(weightRows[0].weight);
+      weightDiffText = (diff > 0 ? "+" : "") + diff.toFixed(1) + "kg";
+    }
+
+    const uniqueDates = new Set(data.map((d) => d.recordDate));
+    const bowelYesCount = data.filter((d) => d.bowelMovement === "あり").length;
+    const bowelRate = uniqueDates.size > 0 ? Math.round((bowelYesCount / uniqueDates.size) * 100) : 0;
+
+    statWorkoutCount.innerText = workoutCount + "回";
+    statWeightDiff.innerText = weightDiffText;
+    statBowelRate.innerText = bowelRate + "%";
   }
 
   function renderList(data) {
     listContainer.innerHTML = "";
+    if (!data.length) {
+      listContainer.innerHTML = '<div class="empty-state">該当する記録がありません</div>';
+      listTotal.innerText = "対象件数: 0件 / 運動時間合計: 0分";
+      return;
+    }
     let exerciseTotal = 0;
     data.forEach((item) => {
       const minutes = Number(item.exerciseMinutes || 0);
       exerciseTotal += minutes;
       const imageUrls = Array.isArray(item.imageUrls) ? item.imageUrls : [];
-      const imageButtons = imageUrls.map((url, idx) => `<button class="image-link-btn" onclick="window.open('${url}','_blank')">📷 写真${idx + 1}</button>`).join("");
+      const imgBtns = imageUrls.map((url, i) =>
+        `<a class="image-link-btn" href="${url}" target="_blank" rel="noopener noreferrer">📷 写真${i + 1}</a>`
+      ).join("");
       const kcal = Number(item.estimatedCalories || 0);
+      const metric = kcal > 0 ? `推定 ${kcal}kcal`
+        : minutes > 0 ? `運動 ${minutes}分`
+        : item.weight > 0 ? `体重 ${item.weight}kg`
+        : "記録済み";
       const div = document.createElement("div");
       div.className = "list-item";
-      div.innerHTML = `<div><div>${item.memo || "メモなし"} [${item.category || item.recordType || "-"}]</div><div style="font-size:11px;color:#999;">${item.recordDate || ""} (${item.userName || "不明"})</div></div>
-      <div style="text-align:right;"><div class="type-label">${item.recordType || "-"}</div><div class="metric-text">${kcal > 0 ? `推定 ${kcal}kcal` : (minutes > 0 ? `運動 ${minutes}分` : (item.weight ? `体重 ${item.weight}kg` : "記録済み"))}</div><div style="margin-top:6px;">${imageButtons}</div></div>`;
+      div.innerHTML = `
+        <div style="flex:1;min-width:0;">
+          <div style="font-size:14px;font-weight:bold;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${item.memo || "メモなし"}</div>
+          <div style="font-size:12px;color:#888;margin-top:2px;">${item.recordDate || ""} · ${item.category || item.recordType || "-"} · ${item.userName || "不明"}</div>
+          ${imgBtns ? `<div style="margin-top:6px;">${imgBtns}</div>` : ""}
+        </div>
+        <div style="text-align:right;flex-shrink:0;">
+          <div class="type-label">${item.recordType || "-"}</div>
+          <div class="metric-text">${metric}</div>
+        </div>`;
       listContainer.appendChild(div);
     });
     listTotal.innerText = `対象件数: ${data.length}件 / 運動時間合計: ${exerciseTotal}分`;
   }
 
+  // ---- サマリータブ ----
+
   function applySummaryFilters() {
-    const baseData = allData.filter((d) => {
+    const base = allData.filter((d) => {
       const dt = new Date(d.recordDate || d.date);
-      return (!summaryUser.value || d.lineId === summaryUser.value) && (!summaryYear.value || dt.getFullYear() == summaryYear.value) && (!summaryMonth.value || dt.getMonth() + 1 == summaryMonth.value);
+      return (!summaryUser.value || d.lineId === summaryUser.value) &&
+        (!summaryYear.value || dt.getFullYear() == summaryYear.value) &&
+        (!summaryMonth.value || dt.getMonth() + 1 == summaryMonth.value);
     });
-    const targetData = baseData.filter((d) => !summaryCategory.value || d.category === summaryCategory.value || d.recordType === summaryCategory.value);
-    const stats = {};
-    targetData.forEach((d) => { const key = d.recordType || "未設定"; stats[key] = (stats[key] || 0) + 1; });
-    const workoutMinutes = baseData.filter((d) => d.recordType === "運動").reduce((sum, d) => sum + (Number(d.exerciseMinutes) || 0), 0);
-    const mealCount = baseData.filter((d) => d.recordType === "食事").length;
-    if (myChart) myChart.destroy();
-    myChart = new Chart(myChartCtx(), { type: "doughnut", data: { labels: Object.keys(stats), datasets: [{ data: Object.values(stats) }] }, options: { responsive: true, maintainAspectRatio: false } });
-    if (myBarChart) myBarChart.destroy();
-    myBarChart = new Chart(barChartCtx(), { type: "bar", data: { labels: ["運動時間(分)", "食事記録数"], datasets: [{ data: [workoutMinutes, mealCount], backgroundColor: ["#007bff", "#d9534f"] }] }, options: { responsive: true, maintainAspectRatio: false } });
+    const filtered = base.filter((d) =>
+      !summaryCategory.value || d.category === summaryCategory.value || d.recordType === summaryCategory.value
+    );
+    renderSummaryKpi(base);
+    renderWeightChart(base);
+    renderBarChart(base);
+    renderDoughnutChart(filtered);
   }
-  const myChartCtx = () => document.getElementById("myChart").getContext("2d");
-  const barChartCtx = () => document.getElementById("barChart").getContext("2d");
+
+  function renderSummaryKpi(data) {
+    const el = document.getElementById("summaryKpi");
+    if (!data.length) { el.classList.add("hidden"); return; }
+    el.classList.remove("hidden");
+
+    const workoutTotal = data.filter((d) => d.recordType === "運動").reduce((s, d) => s + (Number(d.exerciseMinutes) || 0), 0);
+    const mealCount = data.filter((d) => d.recordType === "食事").length;
+    const bowelCount = data.filter((d) => d.bowelMovement === "あり").length;
+    const weightRows = data.filter((d) => Number(d.weight) > 0)
+      .sort((a, b) => String(a.recordDate).localeCompare(String(b.recordDate)));
+
+    let weightDiff = "-";
+    if (weightRows.length >= 2) {
+      const diff = Number(weightRows[weightRows.length - 1].weight) - Number(weightRows[0].weight);
+      weightDiff = (diff > 0 ? "+" : "") + diff.toFixed(1);
+      kpiWeightDiff.style.color = diff > 0 ? "var(--red)" : "var(--green)";
+    }
+    kpiWeightDiff.innerText = weightDiff;
+    kpiWorkoutTotal.innerText = workoutTotal;
+    kpiBowelCount.innerText = bowelCount;
+    kpiMealCount.innerText = mealCount;
+  }
+
+  function renderWeightChart(data) {
+    const rows = data.filter((d) => Number(d.weight) > 0)
+      .sort((a, b) => String(a.recordDate).localeCompare(String(b.recordDate)));
+    const ctx = document.getElementById("weightChart").getContext("2d");
+    if (chartWeight) chartWeight.destroy();
+    if (!rows.length) return;
+    chartWeight = new Chart(ctx, {
+      type: "line",
+      data: {
+        labels: rows.map((d) => d.recordDate),
+        datasets: [{
+          label: "体重 (kg)",
+          data: rows.map((d) => Number(d.weight)),
+          borderColor: "#06C755",
+          backgroundColor: "rgba(6,199,85,0.1)",
+          pointRadius: 4,
+          tension: 0.3,
+          fill: true,
+        }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+          x: { ticks: { maxTicksLimit: 6, font: { size: 10 } } },
+          y: { ticks: { font: { size: 10 } } }
+        }
+      }
+    });
+  }
+
+  function renderBarChart(data) {
+    const workoutMinutes = data.filter((d) => d.recordType === "運動").reduce((s, d) => s + (Number(d.exerciseMinutes) || 0), 0);
+    const mealCount = data.filter((d) => d.recordType === "食事").length;
+    const ctx = document.getElementById("barChart").getContext("2d");
+    if (chartBar) chartBar.destroy();
+    chartBar = new Chart(ctx, {
+      type: "bar",
+      data: {
+        labels: ["運動時間 (分)", "食事記録数"],
+        datasets: [{
+          data: [workoutMinutes, mealCount],
+          backgroundColor: ["#007bff", "#d9534f"],
+          borderRadius: 6,
+        }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: { y: { beginAtZero: true, ticks: { font: { size: 10 } } } }
+      }
+    });
+  }
+
+  function renderDoughnutChart(data) {
+    const stats = {};
+    data.forEach((d) => { const k = d.recordType || "未設定"; stats[k] = (stats[k] || 0) + 1; });
+    const ctx = document.getElementById("myChart").getContext("2d");
+    if (chartDoughnut) chartDoughnut.destroy();
+    if (!Object.keys(stats).length) return;
+    chartDoughnut = new Chart(ctx, {
+      type: "doughnut",
+      data: {
+        labels: Object.keys(stats),
+        datasets: [{ data: Object.values(stats), backgroundColor: ["#06C755", "#007bff", "#ffc107", "#d9534f"] }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { position: "bottom", labels: { font: { size: 12 } } } }
+      }
+    });
+  }
+
+  // ---- 写真 ----
 
   function handleFiles(input) {
     Array.from(input.files).forEach((file) => {
@@ -286,7 +543,10 @@
       previewContainer.appendChild(div);
     });
   }
+
   function removeImg(i) { imageBlobs.splice(i, 1); renderPreviews(); }
+
+  // ---- カロリー推定 ----
 
   async function estimateCalories() {
     if (recordType !== "食事") return alert("食事タブで実行してください");
@@ -296,17 +556,13 @@
     calorieResult.innerText = "写真を解析しています...";
     calorieSources.innerHTML = "";
     try {
-      const res = await callGas("estimateMealCalories", {
-        imageBlobs: imageBlobs,
-        memo: memo.value || "",
-        mealTiming: mealTiming.value || ""
-      });
-      if (res.status !== "success") throw new Error("estimate failed");
+      const res = await callGas("estimateMealCalories", { imageBlobs, memo: memo.value || "", mealTiming: mealTiming.value || "" });
+      if (res.status !== "success") throw new Error();
       latestCalorieEstimate = res.result;
       const r = res.result || {};
       calorieResult.innerText = `推定カロリー: ${Number(r.estimatedCalories || 0)} kcal\nP: ${Number(r.protein || 0)}g / F: ${Number(r.fat || 0)}g / C: ${Number(r.carbohydrate || 0)}g\n根拠: ${r.basis || "食品DBと写真推定の組み合わせ"}`;
-      const refs = Array.isArray(r.referenceSources) ? r.referenceSources : [];
-      calorieSources.innerHTML = refs.map((u) => `<div><a href="${u}" target="_blank" rel="noopener noreferrer">${u}</a></div>`).join("");
+      calorieSources.innerHTML = (Array.isArray(r.referenceSources) ? r.referenceSources : [])
+        .map((u) => `<div><a href="${u}" target="_blank" rel="noopener noreferrer">${u}</a></div>`).join("");
     } catch (_) {
       calorieResult.innerText = "推定に失敗しました。時間をおいて再実行してください。";
     } finally {
@@ -315,17 +571,21 @@
     }
   }
 
+  // ---- 記録送信 ----
+
   async function sendData() {
-    const text = memo.value.trim();
-    if (!text && recordType === "食事") return alert("食事内容をメモに入力してください");
+    if (!memo.value.trim() && recordType === "食事") return alert("食事内容をメモに入力してください");
     submitBtn.disabled = true;
     submitBtn.innerText = "送信中...";
     try {
       const p = await liff.getProfile();
       const payload = {
-        lineId: p.userId, userName: p.displayName, recordType: recordType, category: category.value, mealTiming: mealTiming.value,
-        memo: text || "未入力", recordDate: date.value, exerciseType: exerciseType.value || "", exerciseMinutes: Number(exerciseMinutes.value || 0),
-        weight: Number(weight.value || 0), bodyFat: Number(bodyFat.value || 0), bowelMovement: bowelMovement.value || "", imageBlobs: imageBlobs
+        lineId: p.userId, userName: p.displayName,
+        recordType, category: category.value, mealTiming: mealTiming.value,
+        memo: memo.value.trim() || "未入力", recordDate: date.value,
+        exerciseType: exerciseType.value || "", exerciseMinutes: Number(exerciseMinutes.value || 0),
+        weight: Number(weight.value || 0), bodyFat: Number(bodyFat.value || 0),
+        bowelMovement: bowelMovement.value || "", imageBlobs
       };
       if (latestCalorieEstimate) {
         payload.estimatedCalories = Number(latestCalorieEstimate.estimatedCalories || 0);
@@ -335,7 +595,7 @@
         payload.calorieBasis = latestCalorieEstimate.basis || "";
       }
       const res = await callGas("uploadRecord", payload);
-      if (res.status !== "success") throw new Error("upload failed");
+      if (res.status !== "success") throw new Error();
       alert("記録完了！");
       location.reload();
     } catch (_) {
@@ -345,16 +605,19 @@
     }
   }
 
+  // ---- AI分析 ----
+
   async function runAiAnalysis() {
     aiAnalyzeBtn.disabled = true;
     aiAnalyzeBtn.innerText = "分析中...";
     aiResult.innerText = "AIが分析しています...";
     try {
-      const selectedUser = adviceUser.value || currentUserId;
-      const periodDays = Number(advicePeriod.value || 7);
-      const res = await callGas("analyzeHealth", { lineId: selectedUser, periodDays: periodDays });
-      if (res.status !== "success") throw new Error("analysis failed");
-      aiResult.innerText = (res.result && res.result.adviceText) || res.adviceText || "分析結果が空でした。";
+      const res = await callGas("analyzeHealth", {
+        lineId: adviceUser.value || currentUserId,
+        periodDays: Number(advicePeriod.value || 7)
+      });
+      if (res.status !== "success") throw new Error();
+      aiResult.innerText = (res.result && res.result.adviceText) || "分析結果が空でした。";
     } catch (_) {
       aiResult.innerText = "分析に失敗しました。時間をおいて再実行してください。";
     } finally {
