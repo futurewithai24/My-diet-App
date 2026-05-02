@@ -10,7 +10,7 @@
  */
 
 const SPREADSHEET_ID = "1BrGWRJTnBUBjLOZd3U63ThtDqt_nBdex5FbYkFjrbrI";
-const DRIVE_FOLDER_ID = "1MRTwf4J2X2udXR3RhMpC7Gt7vRtBvOJh";
+const DRIVE_FOLDER_ID = "1gbkevCFj7lMuEUoLs928XRyfAmhi0vrS";
 const USERS_SHEET = "users";
 const RECORDS_SHEET = "records";
 const AI_LOGS_SHEET = "ai_logs";
